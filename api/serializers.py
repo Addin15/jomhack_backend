@@ -13,6 +13,10 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
 
+class EditSerializer(serializers.Serializer):
+    name = serializers.CharField()
+
+
 class ProviderSerializer(serializers.Serializer):
     id = serializers.CharField()
     name = serializers.CharField()
@@ -30,6 +34,7 @@ class PlanSerializer(serializers.Serializer):
     category = serializers.CharField()
     keys = serializers.JSONField()
     provider = ProviderSerializer()
+
 
 class NewsSerializer(serializers.Serializer):
     id = serializers.CharField()

@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import NewsSerializer, UserSerializer, LoginSerializer, PlanSerializer
+from .serializers import EditSerializer, NewsSerializer, UserSerializer, LoginSerializer, PlanSerializer
 from users.models import CustomUser
 from knox.auth import AuthToken, TokenAuthentication
 from django.contrib.auth import authenticate
@@ -53,6 +53,21 @@ def user(request):
     user = request.user
     serializer = UserSerializer(user)
     return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def edit(request):
+    user = request.user
+    serializer = EditSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.data
+
+    user.name = data['name']
+    user.save()
+
+    return Response(data={'message': 'success'}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
