@@ -8,6 +8,9 @@ class Provider(models.Model):
     name = models.CharField(max_length=255, unique=True)
     logo = models.URLField()
     about = models.TextField()
+    phone = models.CharField(max_length=15, null=True, default=None)
+    email = models.EmailField(null=True, default=None)
+    website = models.URLField(null=True, default=None)
 
 
 class Plans(models.Model):

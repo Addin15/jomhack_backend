@@ -12,4 +12,6 @@ urlpatterns = [
     # plans
     path('plans/', views.plans),
     path('user/plans/', views.user_plans),
+    #
+    path('user/news/', views.news),
 ]

@@ -18,6 +18,9 @@ class ProviderSerializer(serializers.Serializer):
     name = serializers.CharField()
     logo = serializers.URLField()
     about = serializers.CharField()
+    phone = serializers.CharField(max_length=15)
+    email = serializers.EmailField()
+    website = serializers.URLField()
 
 
 class PlanSerializer(serializers.Serializer):
@@ -27,3 +30,11 @@ class PlanSerializer(serializers.Serializer):
     category = serializers.CharField()
     keys = serializers.JSONField()
     provider = ProviderSerializer()
+
+class NewsSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    title = serializers.CharField(max_length=100)
+    about = serializers.CharField()
+    category = serializers.CharField(max_length=100)
+    keys = serializers.JSONField()
+    link = serializers.URLField()

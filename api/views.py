@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import UserSerializer, LoginSerializer, PlanSerializer
+from .serializers import NewsSerializer, UserSerializer, LoginSerializer, PlanSerializer
 from users.models import CustomUser
 from knox.auth import AuthToken, TokenAuthentication
 from django.contrib.auth import authenticate
@@ -87,5 +87,32 @@ def user_plans(request):
             related_plans.append(plan)
 
     serializer = PlanSerializer(related_plans, many=True)
+
+    return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def news(request):
+    user = request.user
+
+    # TODO: use AI to get keys for the plan
+    keys = ['Life', 'Disease', 'Medical']
+
+    news = models.News.objects.all()
+
+    related_news = []
+
+    for n in news:
+        matched = 0
+        for key in keys:
+            if key in n.keys:
+                matched += 1
+
+        if matched > 0:
+            related_news.append(n)
+
+    serializer = NewsSerializer(related_news, many=True)
 
     return Response(data=serializer.data, status=status.HTTP_200_OK)
