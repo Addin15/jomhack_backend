@@ -104,9 +104,25 @@ def edit(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def plans(request):
+    user = request.user
+
+    assestment = models.Assestment.objects.filter(user_id=user.id).first()
+    serializer = AssestmentSerializer(assestment)
+    json = serializer.data
+    res = requests.get('https://4m4exndzcucwac4uqb2bksduyi0adrkn.lambda-url.ap-southeast-1.on.aws/evaluate-assessment', params={
+        'age': assestment.age,
+        'job_title': assestment.job_title,
+        'gender': assestment.gender,
+        'existing_condition': assestment.existing_condition,
+        'family_history': assestment.family_history,
+        'smoker': assestment.smoker,
+        'married': assestment.married,
+        'dp_url': 'https://t4.ftcdn.net/jpg/01/69/57/59/360_F_169575948_BYzj2QZeAVj5p1h8bPGQiRuXSbvO84SA.jpg',
+    })
+
     plans = models.Plans.objects.all()
     serializer = PlanSerializer(plans, many=True)
-    return Response(data=serializer.data, status=status.HTTP_200_OK)
+    return Response(data={'plans': serializer.data, 'tier': res.json()['risk_tier']}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -228,6 +244,8 @@ def assestment(request):
 
     data = serializer.validated_data
     data['user_id'] = user.id
+
+    models.Assestment.objects.filter(user_id=user.id).delete()
 
     assestment = models.Assestment.objects.create(**data)
 
