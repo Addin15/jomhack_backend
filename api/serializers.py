@@ -36,6 +36,9 @@ class PlanSerializer(serializers.Serializer):
     category = serializers.CharField()
     keys = serializers.JSONField()
     provider = ProviderSerializer()
+    tier_one_price = serializers.FloatField()
+    tier_two_price = serializers.FloatField()
+    tier_three_price = serializers.FloatField()
 
 
 class NewsSerializer(serializers.Serializer):

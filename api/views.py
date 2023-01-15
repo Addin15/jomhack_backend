@@ -1,3 +1,4 @@
+import io
 from django.shortcuts import render
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -8,6 +9,8 @@ from users.models import CustomUser
 from knox.auth import AuthToken, TokenAuthentication
 from django.contrib.auth import authenticate
 from . import models
+from PIL import Image
+import requests
 
 # Create your views here.
 
@@ -112,10 +115,29 @@ def plans(request):
 def user_plans(request):
     user = request.user
 
-    # TODO: use AI to get keys for the plan
-    keys = ['Life', 'Disease', 'Medical']
+    image = Image.open(user.image)
+    # BytesIO is a file-like buffer stored in memory
+    imgByteArr = io.BytesIO()
+    # image.save expects a file-like as a argument
+    image.save(imgByteArr, format=image.format)
+    # Turn the BytesIO object back into a bytes object
+    imgByteArr = imgByteArr.getvalue()
 
     assestment = models.Assestment.objects.filter(user_id=user.id).first()
+    serializer = AssestmentSerializer(assestment)
+    json = serializer.data
+    res = requests.get('https://4m4exndzcucwac4uqb2bksduyi0adrkn.lambda-url.ap-southeast-1.on.aws/evaluate-assessment', params={
+        'age': assestment.age,
+        'job_title': assestment.job_title,
+        'gender': assestment.gender,
+        'existing_condition': assestment.existing_condition,
+        'family_history': assestment.family_history,
+        'smoker': assestment.smoker,
+        'married': assestment.married,
+        'dp_url': 'https://t4.ftcdn.net/jpg/01/69/57/59/360_F_169575948_BYzj2QZeAVj5p1h8bPGQiRuXSbvO84SA.jpg',
+    })
+
+    keys = res.json()['keywords']
 
     plans = models.Plans.objects.all()
 
@@ -132,7 +154,7 @@ def user_plans(request):
 
     serializer = PlanSerializer(related_plans, many=True)
 
-    return Response(data=serializer.data, status=status.HTTP_200_OK)
+    return Response(data={'plans': serializer.data, 'tier': res.json()['risk_tier']}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -141,8 +163,22 @@ def user_plans(request):
 def news(request):
     user = request.user
 
-    # TODO: use AI to get keys for the plan
-    keys = ['Life', 'Disease', 'Medical']
+    assestment = models.Assestment.objects.filter(user_id=user.id).first()
+    serializer = AssestmentSerializer(assestment)
+    json = serializer.data
+    res = requests.get('https://4m4exndzcucwac4uqb2bksduyi0adrkn.lambda-url.ap-southeast-1.on.aws/evaluate-assessment', params={
+        'age': assestment.age,
+        'job_title': assestment.job_title,
+        'gender': assestment.gender,
+        'existing_condition': assestment.existing_condition,
+        'family_history': assestment.family_history,
+        'smoker': assestment.smoker,
+        'married': assestment.married,
+        'dp_url': 'https://t4.ftcdn.net/jpg/01/69/57/59/360_F_169575948_BYzj2QZeAVj5p1h8bPGQiRuXSbvO84SA.jpg',
+    })
+
+    keys = res.json()['keywords']
+    print(res.json()['keywords'])
 
     news = models.News.objects.all()
 
@@ -159,7 +195,7 @@ def news(request):
 
     serializer = NewsSerializer(related_news, many=True)
 
-    return Response(data=serializer.data, status=status.HTTP_200_OK)
+    return Response(data={'news': serializer.data, 'tier': res.json()['risk_tier']}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

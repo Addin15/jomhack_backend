@@ -20,6 +20,9 @@ class Plans(models.Model):
     category = models.CharField(max_length=100)
     keys = models.JSONField()
     provider = models.ForeignKey(Provider, on_delete=CASCADE)
+    tier_one_price = models.FloatField()
+    tier_two_price = models.FloatField()
+    tier_three_price = models.FloatField()
 
 
 class News(models.Model):
