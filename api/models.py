@@ -33,7 +33,8 @@ class News(models.Model):
 class Assestment(models.Model):
     user_id = models.TextField(unique=True, primary_key=True)
     age = models.IntegerField()
-    job_description = models.TextField()
+    gender = models.CharField(max_length=6, default='Male')
+    job_title = models.TextField()
     existing_condition = models.TextField()
     family_history = models.TextField()
     smoker = models.BooleanField()

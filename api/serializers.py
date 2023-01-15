@@ -53,7 +53,8 @@ class UploadPhotoSerializer(serializers.Serializer):
 
 class AssestmentSerializer(serializers.Serializer):
     age = serializers.IntegerField()
-    job_description = serializers.CharField()
+    gender = serializers.CharField()
+    job_title = serializers.CharField()
     existing_condition = serializers.CharField()
     family_history = serializers.CharField()
     smoker = serializers.BooleanField()

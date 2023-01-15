@@ -47,11 +47,14 @@ def login(request):
 
     user_data = user.data
 
+    user_data['assestment'] = None
+
     assestment = models.Assestment.objects.filter(user_id=id).first()
 
-    assestment_serializer = AssestmentSerializer(assestment)
+    if assestment is not None:
+        assestment_serializer = AssestmentSerializer(assestment)
 
-    user_data['assestment'] = assestment_serializer.data
+        user_data['assestment'] = assestment_serializer.data
 
     return Response(data={'user': user_data, 'token': token}, status=status.HTTP_200_OK)
 
@@ -63,12 +66,14 @@ def user(request):
     user = request.user
     serializer = UserSerializer(user)
     data = serializer.data
+    data['assestment'] = None
 
     assestment = models.Assestment.objects.filter(user_id=user.id).first()
 
-    assestment_serializer = AssestmentSerializer(assestment)
+    if assestment is not None:
+        assestment_serializer = AssestmentSerializer(assestment)
 
-    data['assestment'] = assestment_serializer.data
+        data['assestment'] = assestment_serializer.data
 
     return Response(data=data, status=status.HTTP_200_OK)
 
@@ -109,6 +114,8 @@ def user_plans(request):
 
     # TODO: use AI to get keys for the plan
     keys = ['Life', 'Disease', 'Medical']
+
+    assestment = models.Assestment.objects.filter(user_id=user.id).first()
 
     plans = models.Plans.objects.all()
 
