@@ -6,6 +6,7 @@ class UserSerializer(serializers.Serializer):
     name = serializers.CharField()
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+    image = serializers.ImageField(read_only=True)
 
 
 class LoginSerializer(serializers.Serializer):
@@ -15,6 +16,7 @@ class LoginSerializer(serializers.Serializer):
 
 class EditSerializer(serializers.Serializer):
     name = serializers.CharField()
+    image = serializers.ImageField()
 
 
 class ProviderSerializer(serializers.Serializer):
@@ -43,3 +45,16 @@ class NewsSerializer(serializers.Serializer):
     category = serializers.CharField(max_length=100)
     keys = serializers.JSONField()
     link = serializers.URLField()
+
+
+class UploadPhotoSerializer(serializers.Serializer):
+    image = serializers.ImageField()
+
+
+class AssestmentSerializer(serializers.Serializer):
+    age = serializers.IntegerField()
+    job_description = serializers.CharField()
+    existing_condition = serializers.CharField()
+    family_history = serializers.CharField()
+    smoker = serializers.BooleanField()
+    married = serializers.BooleanField()

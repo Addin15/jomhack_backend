@@ -31,10 +31,10 @@ class News(models.Model):
 
 
 class Assestment(models.Model):
-    user_id = models.TextField()
+    user_id = models.TextField(unique=True, primary_key=True)
     age = models.IntegerField()
-    job = models.CharField(max_length=100)
-    job_description = models.TextField(null=True, default=None)
-    car_number = models.IntegerField()
-    house_number = models.IntegerField()
-    disease = models.TextField(null=True, default=None)
+    job_description = models.TextField()
+    existing_condition = models.TextField()
+    family_history = models.TextField()
+    smoker = models.BooleanField()
+    married = models.BooleanField()

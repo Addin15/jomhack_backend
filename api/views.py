@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import EditSerializer, NewsSerializer, UserSerializer, LoginSerializer, PlanSerializer
+from .serializers import AssestmentSerializer, EditSerializer, NewsSerializer, UploadPhotoSerializer, UserSerializer, LoginSerializer, PlanSerializer
 from users.models import CustomUser
 from knox.auth import AuthToken, TokenAuthentication
 from django.contrib.auth import authenticate
@@ -41,9 +41,19 @@ def login(request):
 
     token = AuthToken.objects.create(user=user)[1]
 
+    id = user.id
+
     user = UserSerializer(user)
 
-    return Response(data={'user': user.data, 'token': token}, status=status.HTTP_200_OK)
+    user_data = user.data
+
+    assestment = models.Assestment.objects.filter(user_id=id).first()
+
+    assestment_serializer = AssestmentSerializer(assestment)
+
+    user_data['assestment'] = assestment_serializer.data
+
+    return Response(data={'user': user_data, 'token': token}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -52,7 +62,15 @@ def login(request):
 def user(request):
     user = request.user
     serializer = UserSerializer(user)
-    return Response(data=serializer.data, status=status.HTTP_200_OK)
+    data = serializer.data
+
+    assestment = models.Assestment.objects.filter(user_id=user.id).first()
+
+    assestment_serializer = AssestmentSerializer(assestment)
+
+    data['assestment'] = assestment_serializer.data
+
+    return Response(data=data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -64,7 +82,11 @@ def edit(request):
     serializer.is_valid(raise_exception=True)
     data = serializer.data
 
+    if (request.FILES.get('image') is not None):
+        data['image'] = request.FILES.get('image')
+
     user.name = data['name']
+    user.image = data['image']
     user.save()
 
     return Response(data={'message': 'success'}, status=status.HTTP_200_OK)
@@ -129,5 +151,43 @@ def news(request):
             related_news.append(n)
 
     serializer = NewsSerializer(related_news, many=True)
+
+    return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def upload_photo(request):
+    user = request.user
+    file = request.FILES
+
+    serializer = UploadPhotoSerializer(data=file)
+    serializer.is_valid(raise_exception=True)
+
+    data = serializer.validated_data
+
+    user.image = data['image']
+    user.save()
+
+    return Response(data={'message': 'success'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def assestment(request):
+    user = request.user
+    data = request.data
+
+    serializer = AssestmentSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
+
+    data = serializer.validated_data
+    data['user_id'] = user.id
+
+    assestment = models.Assestment.objects.create(**data)
+
+    serializer = AssestmentSerializer(assestment)
 
     return Response(data=serializer.data, status=status.HTTP_200_OK)
